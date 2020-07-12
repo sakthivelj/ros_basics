@@ -7,12 +7,20 @@ from ros_service.srv import AddTwoIntsRequest
 from ros_service.srv import AddTwoIntsResponse
 
 
-def add_two_ints_client(x,y):
-    
-def usage():
-    return "%s [x,y]"%sys.argv[0]
+def add_two_ints_client(x, y):
 
-if __name__ == '__main__':
+    rospy.wait_for_service('add_two_ints')
+    try:
+        add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
+        resp1 = add_two_ints(x, y)
+        return resp1.sum
+    except rospy.ServiceException, e:
+        print "Service call failed: %s"%e
+
+def usage():
+    return "%s [x y]"%sys.argv[0]
+
+if __name__ == "__main__":
 
     if len(sys.argv) == 3:
         x = int(sys.argv[1])
@@ -20,4 +28,7 @@ if __name__ == '__main__':
     else:
         print usage()
         sys.exit(1)
-    print "Request %s+%s""%(x,y)
+
+    print "Requesting %s+%s"%(x,y)
+    s = add_two_ints_client(x,y)
+    print "%s + %s = %s"%(x, y, s)
